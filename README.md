@@ -1,36 +1,83 @@
-# Case Técnico – Cientista de Dados | Datarisk
+# Credit Default Prediction Case Study
 
-## Apresentação
+## 📌 Project Overview
+This project is a technical case study simulating a real-world scenario in a major bank.  
+The goal is to develop a **predictive model** to estimate the probability of credit default in real time and design a **credit policy** based on these predictions.
 
-Este repositório contém o case técnico para o processo seletivo de **Cientista de Dados** na **Datarisk**, uma empresa de consultoria especializada em soluções de dados e inteligência de crédito.  
-O desafio simula um projeto real de **risco de crédito**, como os que desenvolvemos junto a grandes instituições financeiras no Brasil.
+Deliverables include:
+1. A predictive model to estimate default probability.
+2. A credit policy recommendation (approval, rejection, or conditional approval).
+3. A reproducible codebase.
+4. A CSV file with predicted probabilities for new contracts.
 
-## Instruções
+---
 
-Todas as instruções e regras para a realização do case estão detalhadas no documento: `Case Técnico DS.pdf`
+## 📂 Data Sources
+The project uses four main datasets:
 
-> **É imprescindível que você leia o documento com atenção** antes de iniciar sua solução.
+- **base_cadastral.parquet** → Demographic and socioeconomic client data.
+- **historico_emprestimos.parquet** → Past loan history (values, contract types, final status, etc.).
+- **historico_parcelas.parquet** → Installment payments (amounts, due dates, delays).
+- **base_submissao.parquet** → Current credit applications to score.
 
-## Bases de Dados
+All datasets are linked via:
+- `id_cliente` (client ID).
+- `id_contrato` (contract ID).
 
-Na pasta `/data`, você encontrará:
-- Quatro bases de dados para serem utilizadas (devidamente documentadas no PDF)
-- Um arquivo `dicionario_dados.csv` com a descrição completa de todas as variáveis
+---
 
-## Submissão
+## 🛠 Project Workflow
 
-Embora você possa publicar sua solução em um repositório público para fins de portfólio, **a submissão oficial deve ser feita por e-mail**, conforme descrito no PDF, para garantir a **anonimidade no processo seletivo**.
+### 1. Problem Understanding
+- Build a real-time default risk prediction model.
+- Propose a business-oriented credit policy.
 
-⚠️ **Não inclua informações pessoais (nome, LinkedIn, GitHub, etc.) nos arquivos da solução**.
+### 2. Target Variable Definition
+Default can be defined in multiple ways:
+- **FPD**: First Payment Default.
+- **EVER30MOB03**: >30 days late within first 3 months.
+- **OVER60MOB06**: >60 days cumulative delay within 6 months.
 
-## Recomendação
+👉 The chosen definition must balance predictive power, interpretability, and business context.
 
-Mais do que técnicas avançadas, queremos entender **como você pensa e estrutura sua abordagem frente ao problema de negócio**.  
-Técnicas simples e bem aplicadas, com clareza e justificativa, valem mais do que soluções complexas sem contexto e aplicabilidade.
+### 3. Data Preparation
+**Integration**
+- Join client, loan, and installment tables into a modeling dataset.  
 
-## Dica prática
+**Cleaning**
+- Handle missing values (median imputation, category `Unknown`).  
+- Remove duplicates and inconsistent records.  
 
-Se o processamento local estiver pesado, você pode utilizar o **Google Colab** para rodar os códigos.
+**Outlier Detection**
+- Boxplots and z-scores for numerical variables (age, income, loan value).  
+- Treat extreme values using winsorization or log-transform.  
 
-**Boa sorte no desafio!**
+### 4. Exploratory Data Analysis (EDA)
+- Univariate distributions (age, income, loan amount).  
+- Bivariate analysis (default vs non-default).  
+- Correlation matrix for numeric features.  
+- Visualizations: histograms, boxplots, heatmaps.  
+
+### 5. Feature Engineering
+- **From loan history**: number of past loans, share of defaults, average loan value, client relationship duration.  
+- **From installments**: mean delay days, share of overdue installments, recurrence of delinquency.  
+- **From demographics**: age categories, income-to-loan ratio.  
+
+### 6. Modeling
+- **Baseline**: Logistic Regression (interpretability).  
+- **Tree-based models**: LightGBM, XGBoost, Random Forest (performance).  
+- **Validation**: Stratified K-Fold cross-validation.  
+- **Metrics**: AUC-ROC, KS, Precision-Recall (recall prioritized to minimize risk exposure).  
+
+### 7. Model Interpretation
+- Feature importance with SHAP values.  
+- Business insights: client profiles most at risk.  
+
+### 8. Credit Policy
+Cutoffs based on predicted probabilities:  
+- `p < 0.2`: Approve.  
+- `0.2 ≤ p < 0.5`: Conditional approval (reduced amount, higher interest).  
+- `p ≥ 0.5`: Reject.  
+
+---
 
