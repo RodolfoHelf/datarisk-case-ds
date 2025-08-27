@@ -55,54 +55,54 @@ class DataProcessor:
             print(f"✓ base_cadastral: filled {df['ocupacao'].isnull().sum()} missing ocupacao values")
         
         # base_submissao - fill missing values
-        if 'base_submissao' in self.processed_data:
-            df = self.processed_data['base_submissao']
-            df['valor_bem'] = df['valor_bem'].fillna(df['valor_credito'])  # Use credit value as fallback
-            df['valor_parcela'] = df['valor_parcela'].fillna(df['valor_credito'] / 12)  # Estimate monthly payment
-            print(f"✓ base_submissao: filled missing valor_bem and valor_parcela values")
+        # if 'base_submissao' in self.processed_data:
+        #     df = self.processed_data['base_submissao']
+        #     df['valor_bem'] = df['valor_bem'].fillna(df['valor_credito'])  # Use credit value as fallback
+        #     df['valor_parcela'] = df['valor_parcela'].fillna(df['valor_credito'] / 12)  # Estimate monthly payment
+        #     print(f"✓ base_submissao: filled missing valor_bem and valor_parcela values")
         
-        # historico_emprestimos - fill missing values
-        if 'historico_emprestimos' in self.processed_data:
-            df = self.processed_data['historico_emprestimos']
+        # # historico_emprestimos - fill missing values
+        # if 'historico_emprestimos' in self.processed_data:
+        #     df = self.processed_data['historico_emprestimos']
             
-            # Fill missing dates with reasonable defaults
-            df['data_liberacao'] = df['data_liberacao'].fillna(df['data_decisao'])
+        #     # Fill missing dates with reasonable defaults
+        #     df['data_liberacao'] = df['data_liberacao'].fillna(df['data_decisao'])
             
-            # Convert data_decisao to datetime first
-            df['data_decisao'] = pd.to_datetime(df['data_decisao'])
+        #     # Convert data_decisao to datetime first
+        #     df['data_decisao'] = pd.to_datetime(df['data_decisao'])
             
-            # Fill missing first payment date (1 month after decision)
-            df['data_primeiro_vencimento'] = df['data_primeiro_vencimento'].fillna(
-                df['data_decisao'] + pd.DateOffset(months=1)
-            )
+        #     # Fill missing first payment date (1 month after decision)
+        #     df['data_primeiro_vencimento'] = df['data_primeiro_vencimento'].fillna(
+        #         df['data_decisao'] + pd.DateOffset(months=1)
+        #     )
             
-            # Fill missing last payment date (use 12 months as default)
-            df['data_ultimo_vencimento_original'] = df['data_ultimo_vencimento_original'].fillna(
-                df['data_decisao'] + pd.DateOffset(months=12)
-            )
+        #     # Fill missing last payment date (use 12 months as default)
+        #     df['data_ultimo_vencimento_original'] = df['data_ultimo_vencimento_original'].fillna(
+        #         df['data_decisao'] + pd.DateOffset(months=12)
+        #     )
             
-            df['data_ultimo_vencimento'] = df['data_ultimo_vencimento'].fillna(df['data_ultimo_vencimento_original'])
-            df['data_encerramento'] = df['data_encerramento'].fillna(df['data_ultimo_vencimento'])
+        #     df['data_ultimo_vencimento'] = df['data_ultimo_vencimento'].fillna(df['data_ultimo_vencimento_original'])
+        #     df['data_encerramento'] = df['data_encerramento'].fillna(df['data_ultimo_vencimento'])
             
-            # Fill missing financial values
-            df['valor_bem'] = df['valor_bem'].fillna(df['valor_credito'])
-            df['valor_parcela'] = df['valor_parcela'].fillna(df['valor_credito'] / df['qtd_parcelas_planejadas'].fillna(12))
-            df['valor_entrada'] = df['valor_entrada'].fillna(0)
-            df['percentual_entrada'] = df['percentual_entrada'].fillna(0)
-            df['qtd_parcelas_planejadas'] = df['qtd_parcelas_planejadas'].fillna(12)
-            df['taxa_juros_padrao'] = df['taxa_juros_padrao'].fillna(0.02)  # 2% default
-            df['taxa_juros_promocional'] = df['taxa_juros_promocional'].fillna(0.02)
-            df['acompanhantes_cliente'] = df['acompanhantes_cliente'].fillna('None')
-            df['flag_seguro_contratado'] = df['flag_seguro_contratado'].fillna(0)
+        #     # Fill missing financial values
+        #     df['valor_bem'] = df['valor_bem'].fillna(df['valor_credito'])
+        #     df['valor_parcela'] = df['valor_parcela'].fillna(df['valor_credito'] / df['qtd_parcelas_planejadas'].fillna(12))
+        #     df['valor_entrada'] = df['valor_entrada'].fillna(0)
+        #     df['percentual_entrada'] = df['percentual_entrada'].fillna(0)
+        #     df['qtd_parcelas_planejadas'] = df['qtd_parcelas_planejadas'].fillna(12)
+        #     df['taxa_juros_padrao'] = df['taxa_juros_padrao'].fillna(0.02)  # 2% default
+        #     df['taxa_juros_promocional'] = df['taxa_juros_promocional'].fillna(0.02)
+        #     df['acompanhantes_cliente'] = df['acompanhantes_cliente'].fillna('None')
+        #     df['flag_seguro_contratado'] = df['flag_seguro_contratado'].fillna(0)
             
-            print(f"✓ historico_emprestimos: filled missing values in dates, financial fields, and flags")
+        #     print(f"✓ historico_emprestimos: filled missing values in dates, financial fields, and flags")
         
-        # historico_parcelas - fill missing values
-        if 'historico_parcelas' in self.processed_data:
-            df = self.processed_data['historico_parcelas']
-            df['data_real_pagamento'] = df['data_real_pagamento'].fillna(df['data_prevista_pagamento'])
-            df['valor_pago_parcela'] = df['valor_pago_parcela'].fillna(df['valor_previsto_parcela'])
-            print(f"✓ historico_parcelas: filled missing payment dates and amounts")
+        # # historico_parcelas - fill missing values
+        # if 'historico_parcelas' in self.processed_data:
+        #     df = self.processed_data['historico_parcelas']
+        #     df['data_real_pagamento'] = df['data_real_pagamento'].fillna(df['data_prevista_pagamento'])
+        #     df['valor_pago_parcela'] = df['valor_pago_parcela'].fillna(df['valor_previsto_parcela'])
+        #     print(f"✓ historico_parcelas: filled missing payment dates and amounts")
         
         print("Missing values handled successfully!\n")
         
