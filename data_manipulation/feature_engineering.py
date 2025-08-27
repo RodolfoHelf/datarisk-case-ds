@@ -527,16 +527,54 @@ class FeatureEngineer:
                     how='left'
                 )
             
-            # Fill missing values
-            final_df = final_df.fillna(0)
-            
-            self.features['final_dataset'] = final_df
-            print(f"✓ Final dataset created: {final_df.shape}")
-            
-            # Show feature summary
-            print(f"\nFinal dataset columns: {len(final_df.columns)}")
-            print(f"Final dataset rows: {len(final_df)}")
-            print(f"Memory usage: {final_df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
+                    # Fill missing values - handle categorical and numerical columns separately
+        for col in final_df.columns:
+            if final_df[col].dtype.name == 'category':
+                # For categorical columns, fill with mode (most frequent value) or 'Unknown'
+                if final_df[col].notna().sum() > 0:
+                    mode_value = final_df[col].mode().iloc[0] if len(final_df[col].mode()) > 0 else 'Unknown'
+                    final_df[col] = final_df[col].fillna(mode_value)
+                else:
+                    final_df[col] = final_df[col].fillna('Unknown')
+            elif final_df[col].dtype == 'object':
+                # For object columns, fill with 'Unknown'
+                final_df[col] = final_df[col].fillna('Unknown')
+            elif final_df[col].dtype == 'bool':
+                # For boolean columns, fill with False
+                final_df[col] = final_df[col].fillna(False)
+            else:
+                # For numerical columns, fill with 0
+                final_df[col] = final_df[col].fillna(0)
+        
+        # Ensure data type consistency for parquet saving
+        for col in final_df.columns:
+            if final_df[col].dtype == 'bool':
+                # Convert boolean columns to int8 to avoid mixed types
+                final_df[col] = final_df[col].astype('int8')
+            elif final_df[col].dtype.name == 'category':
+                # Convert categorical to string to avoid mixed types
+                final_df[col] = final_df[col].astype('string')
+            elif final_df[col].dtype == 'object':
+                # Check if object column contains mixed types and convert appropriately
+                unique_types = set([type(x) for x in final_df[col].dropna().unique()])
+                if len(unique_types) > 1:
+                    # Convert to string to handle mixed types
+                    final_df[col] = final_df[col].astype('string')
+                elif bool in unique_types:
+                    # If it contains boolean values, convert to int8
+                    final_df[col] = final_df[col].astype('int8')
+                else:
+                    # Keep as string for other object types
+                    final_df[col] = final_df[col].astype('string')
+        
+        # Store the final dataset
+        self.features['final_dataset'] = final_df
+        print(f"✓ Final dataset created: {final_df.shape}")
+        
+        # Show feature summary
+        print(f"\nFinal dataset columns: {len(final_df.columns)}")
+        print(f"Final dataset rows: {len(final_df)}")
+        print(f"Memory usage: {final_df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
         
         print("Feature merging completed successfully!\n")
         
